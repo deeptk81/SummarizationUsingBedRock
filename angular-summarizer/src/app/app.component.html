@@ -1,0 +1,170 @@
+
+
+
+
+
+
+
+<div class="container">
+  <!-- Header -->
+  <div class="text-center mb-4">
+    <h1 class="app-title">
+      <i class="fas fa-robot"></i>
+      {{ title }}
+    </h1>
+    <p class="app-subtitle">
+      Powered by AWS Bedrock & Claude AI
+    </p>
+  </div>
+
+  <!-- API Health Status -->
+  <div class="card health-card" *ngIf="healthStatus">
+    <div class="health-status">
+      <div class="health-item">
+        <i class="fas fa-server" 
+           [class.text-success]="healthStatus.status === 'healthy'"
+           [class.text-danger]="healthStatus.status !== 'healthy'"></i>
+        <span>API Status: </span>
+        <strong [class.text-success]="healthStatus.status === 'healthy'"
+                [class.text-danger]="healthStatus.status !== 'healthy'">
+          {{ healthStatus.status | titlecase }}
+        </strong>
+      </div>
+      <div class="health-item">
+        <i class="fas fa-brain"
+           [class.text-success]="healthStatus.bedrock_available"
+           [class.text-danger]="!healthStatus.bedrock_available"></i>
+        <span>Bedrock AI: </span>
+        <strong [class.text-success]="healthStatus.bedrock_available"
+                [class.text-danger]="!healthStatus.bedrock_available">
+          {{ healthStatus.bedrock_available ? 'Available' : 'Unavailable' }}
+        </strong>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Form -->
+  <div class="card">
+    <form [formGroup]="summaryForm" (ngSubmit)="onSubmit()">
+      <div class="form-group">
+        <label for="url" class="form-label">
+          <i class="fas fa-link"></i>
+          Enter URL to Summarize
+        </label>
+        <input
+          type="url"
+          id="url"
+          formControlName="url"
+          class="form-control"
+          [class.is-invalid]="hasUrlError"
+          [class.is-valid]="urlControl?.valid && urlControl?.dirty"
+          placeholder="https://example.com/article"
+          [disabled]="isLoading">
+        
+        <div class="invalid-feedback" *ngIf="hasUrlError">
+          {{ urlErrorMessage }}
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button
+          type="submit"
+          class="btn btn-primary"
+          [disabled]="summaryForm.invalid || isLoading">
+          <span *ngIf="isLoading" class="spinner"></span>
+          <i *ngIf="!isLoading" class="fas fa-magic"></i>
+          {{ isLoading ? 'Generating Summary...' : 'Summarize' }}
+        </button>
+        
+        <button
+          type="button"
+          class="btn btn-secondary"
+          (click)="clearForm()"
+          [disabled]="isLoading">
+          <i class="fas fa-eraser"></i>
+          Clear
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Error Message -->
+  <div class="alert alert-danger" *ngIf="errorMessage">
+    <i class="fas fa-exclamation-triangle"></i>
+    <strong>Error:</strong> {{ errorMessage }}
+  </div>
+
+  <!-- Summary Result -->
+  <div class="card summary-card" *ngIf="summaryResult">
+    <div class="summary-header">
+      <h3 class="summary-title">
+        <i class="fas fa-file-alt"></i>
+        {{ summaryResult.title }}
+      </h3>
+      <div class="summary-url">
+        <i class="fas fa-external-link-alt"></i>
+        <a [href]="summaryResult.url" target="_blank" rel="noopener noreferrer">
+          {{ summaryResult.url }}
+        </a>
+      </div>
+    </div>
+    
+    <div class="summary-content">
+      <h4 class="summary-section-title">
+        <i class="fas fa-brain"></i>
+        AI Summary
+      </h4>
+      <div class="summary-text" [innerHTML]="formatSummary(summaryResult.summary || '')">
+      </div>
+    </div>
+    
+    <div class="summary-actions">
+      <button class="btn btn-secondary" (click)="clearResults()">
+        <i class="fas fa-times"></i>
+        Clear Summary
+      </button>
+    </div>
+  </div>
+
+  <!-- Sample URLs -->
+  <div class="card sample-urls-card">
+    <h3 class="sample-title">
+      <i class="fas fa-lightbulb"></i>
+      Try These Sample URLs
+    </h3>
+    <p class="sample-description">
+      Click on any URL below to test the summarizer with real content:
+    </p>
+    
+    <div class="sample-urls-grid">
+      <div class="sample-url-item" *ngFor="let sample of sampleUrls">
+        <div class="sample-url-header">
+          <strong>{{ sample.name }}</strong>
+        </div>
+        <a
+          href="javascript:void(0)"
+          class="sample-url-link"
+          (click)="useSampleUrl(sample.url)"
+          [title]="sample.url">
+          {{ sample.url }}
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <p class="footer-text">
+      <i class="fas fa-info-circle"></i>
+      This application uses AWS Bedrock with Claude 3 Haiku for AI-powered content summarization.
+      Processing time varies based on content length and complexity.
+    </p>
+  </div>
+</div>
+
+
+
+
+
+
+
